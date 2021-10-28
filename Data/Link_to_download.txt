@@ -1,0 +1,5 @@
+MNISTFashion training/test datasets can be downloaded using the below link:
+
+https://www.kaggle.com/zalando-research/fashionmnist
+
+
