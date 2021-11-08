@@ -14,11 +14,28 @@ The system will have a single client consuming a single machine learning service
  **2. Required packages**
 -------------
 
+1. cudatoolkit               10.1.243
+2. cudnn                     7.6.5
+3. h5py                      2.10.0
+4. kafka-python              2.0.2
+5. keras-preprocessing       1.1.2
+6. matplotlib                3.4.3
+7. numpy                     1.21.2
+8. opencv                    4.5.0 
+9. pandas                    1.3.4
+10. pillow                    8.4.0
+11. python                    3.9.7
+12. scikit-learn              1.0.1
+13. scipy                     1.7.1
+14. tensorflow-gpu            2.4.1
 
 
 ----------
  **3. How to run**
 -------------
+
+The reference dataset being considered is MNISTFashion Dataset and can be downloaded from [here](https://www.kaggle.com/zalando-research/fashionmnist). 
+
 
 ***Steps to execute:***
 
@@ -102,9 +119,14 @@ To test end-to-end, a simple scenario - predict the model given an image as inpu
 -------------
 
 1. There is further scope to improve the model accuracy
-2. Google Pub/Sub is to be integrated.
+2. Support end-to-end for all functionality of the model.
+3. Google Pub/Sub is to be integrated.
 
 ----------
  **7. References**
 -------------
 
+1. [Dataset Download](https://www.kaggle.com/zalando-research/fashionmnist)
+2. [Python Multiprocessing - Corey Schafer](https://www.youtube.com/watch?v=fKl2JW_qrso)
+3. [Python Multiprocessing - TutorialEdge](https://tutorialedge.net/python/concurrency/python-processpoolexecutor-tutorial/)
+4. [Producer sending an image issue](https://github.com/dpkp/kafka-python/issues/1045)
