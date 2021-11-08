@@ -1,10 +1,11 @@
 
 #INITIAL SETTINGS
-data_dir: "./Data/"
-weights_dir: "./Weights"
+data_dir: "../Data/"
+weights_dir: "../Weights/"
 train_csv: "fashion-mnist_train.csv"
 test_csv: "fashion-mnist_test.csv"
-model_name: trained_weights.h5
+model_name: "trained_weights.h5"
+label_name_map: {0: ‘Top’, 1: ‘Trouser’, 2: ‘Pullover’, 3: ‘Dress’, 4: ‘Coat’, 5: ‘Sandal’, 6: ‘Shirt’, 7: ‘Sneaker’, 8: ‘Bag’, 9: ‘Boot’}
 
 #PARAMETERS
 IMG_ROWS: 28

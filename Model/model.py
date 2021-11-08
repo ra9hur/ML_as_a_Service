@@ -6,9 +6,15 @@ Created on Wed Oct 27 12:38:44 2021
 @author: raghu
 """
 
+import logging
+
+logging.basicConfig(filename='../project.log', level=logging.INFO,
+                    format='%(asctime)s:%(levelname)s:%(message)s')
 
 # baseline cnn model for fashion mnist
 import pandas as pd
+import numpy as np
+import matplotlib.image as mpimg
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import to_categorical
 from tensorflow.python.keras.models import Sequential
@@ -18,6 +24,8 @@ from tensorflow.python.keras.layers import Dense
 from tensorflow.python.keras.layers import Flatten
 import os
 import yaml
+import sys
+import cv2
 
 
 # gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -35,7 +43,7 @@ import yaml
 
 # ---------------- Load configuration parameters ------------
 
-config_path = "./Configs"
+config_path = "../Configs"
 config_name = "config.yaml"
 
 with open(os.path.join(config_path, config_name)) as file:
@@ -43,8 +51,10 @@ with open(os.path.join(config_path, config_name)) as file:
 
 data_dir = config["data_dir"]
 weights_dir = config["weights_dir"]
+model_name = config["model_name"]
 train_csv = config["train_csv"]
 test_csv = config["test_csv"]
+label_name_map = config["label_name_map"]
 train_file = data_dir+train_csv
 test_file  = data_dir+test_csv
 
@@ -53,7 +63,7 @@ IMG_ROWS = config["IMG_ROWS"]
 IMG_COLS = config["IMG_COLS"]
 TEST_SIZE = config["TEST_SIZE"]
 BATCH_SIZE = config["BATCH_SIZE"]
-NUM_EPOCHS = config["NO_EPOCHS"]
+NUM_EPOCHS = config["NUM_EPOCHS"]
 
 
 # ---------------- Load Data ----------------------------------------
@@ -122,6 +132,11 @@ def train_model():
 	# define model
     model = define_model()
     
+    wt_file = weights_dir + model_name
+    
+    if (os.path.isfile(wt_file)):
+        model.load_weights(wt_file)
+    
     trained_model = model.fit(trainX, trainY,
                   batch_size=BATCH_SIZE,
                   epochs=NUM_EPOCHS,
@@ -129,7 +144,7 @@ def train_model():
                   validation_data=(valX, valY))
     
     # Save weights
-    wt_file = weights_dir + '/trained_weights.h5'
+    wt_file = weights_dir + model_name
     model.save_weights(wt_file)
     
     #hist = trained_model.history
@@ -153,14 +168,74 @@ def evaluate_model():
     model = define_model()
 
     # Load trained weights
-    wt_file = weights_dir + '/trained_weights.h5'
-    model.load_weights(wt_file)
+    wt_file = weights_dir + model_name
+
+    try:
+        model.load_weights(wt_file)
+    except:
+        raise Exception("Trained model not available")
     
     # Evaluate the model
     _, acc = model.evaluate(testX, testY, verbose=0)
     
     return ' %.3f' % (acc * 100.0)
     
+
+# ---------------- predict given input image --------------------
+
+def predict_model(img):
+
+    logging.info("model.predict_model - BEGIN")
+
+    # Re-shape the image to 4-dim    
+    img = img.reshape(1, IMG_ROWS, IMG_COLS, 1)
+
+    # Pre-process data
+    img = pre_process(img)    
+
+	# define model
+    model = define_model()
+
+    # Load trained weights
+    wt_file = weights_dir + model_name
+
+    try:
+        model.load_weights(wt_file)
+    except:
+        raise Exception("Trained model not available")
+    
+    pred = model.predict(img)
+    pred = np.argmax(pred)
+    
+    result = dict()
+    result[pred.item()] = label_name_map[pred.item()]
+    
+    logging.info("model.predict_model - END")
+    
+    return result
+    
+
+# ---------------- process requests -------------------------
+
+def model_request(identifier, image):
+    
+    logging.info("model.model_request - BEGIN")
+    print("model.model_request PID {}".format(os.getpid()))
+    logging.info("model.model_request PID {}".format(os.getpid()))
+
+    image = np.asarray(image)
+    print("image shape: ", image.shape)
+    result = predict_model(image)
+    #result = {'7': '‘Sneaker’'}
+
+    sys.path.insert(1, '../MessageBroker')
+    from unifiedAPI import response_handler
+
+    logging.info("model.model_request - unifiedAPI.response_handler initiating")
+    response_handler(identifier, result)
+    logging.info("model.model_request - unifiedAPI.response_handler successful")
+
+    logging.info("model.model_request - END")
 
 
 
@@ -176,5 +251,9 @@ if __name__ == "__main__":
     
     print("Evaluation Accuracy: ", eval_acc)
     
+    img = mpimg.imread('Client/sneaker7.png')
+        
+    _, result = predict_model(1, img)
     
-    
+    print("Predicted class: ", result)
+
