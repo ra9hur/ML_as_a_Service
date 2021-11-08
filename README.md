@@ -45,7 +45,7 @@ Open 3 terminals to execute scripts as mentioned below.
     
     ‘python kafkaReq_send.py sandal5.png’ 
     
-    to send a predict_model request via Kafka message broker.
+    to send a predict_model request via Kafka message broker. One of the images from Client/Images folder can be selected as parameter. Default is sneaker7.png.
 3. Terminal 2: Change directory to MessageBroker and run,
     
     'python kafkaReq_recv.py'
