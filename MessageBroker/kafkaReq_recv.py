@@ -36,9 +36,9 @@ for message in consumer:
     
     
     # Pass input and identifier to unifiedAPI
-    logging.info("kafka:req_predict - unifiedAPI.request_handler initiating")
+    logging.info("kafka:req_predict - unifiedAPI.process_request initiating")
     process_request(identifier, image)
-    logging.info("kafka:req_predict - unifiedAPI.request_handler successful")
+    logging.info("kafka:req_predict - unifiedAPI.process_request successful")
     
     stream.close()
     image.show()

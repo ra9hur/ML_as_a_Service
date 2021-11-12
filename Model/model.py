@@ -210,6 +210,8 @@ def predict_model(img):
     result = dict()
     result[pred.item()] = label_name_map[pred.item()]
     
+    logging.info("result: {}".format(result))
+
     logging.info("model.predict_model - END")
     
     return result
@@ -226,7 +228,7 @@ def model_request(identifier, image):
     image = np.asarray(image)
     print("image shape: ", image.shape)
     result = predict_model(image)
-    #result = {'7': '‘Sneaker’'}
+    #result = {'7': 'Sneaker'}
 
     sys.path.insert(1, '../MessageBroker')
     from unifiedAPI import response_handler

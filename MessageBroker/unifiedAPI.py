@@ -11,6 +11,7 @@ from concurrent.futures import ProcessPoolExecutor
 import sys
 import os
 import multiprocessing
+import json
 import logging
 
 logging.basicConfig(filename='../project.log', level=logging.INFO,
@@ -18,7 +19,7 @@ logging.basicConfig(filename='../project.log', level=logging.INFO,
 
 
 # In later versions
-# Processes input and places them in the required folders. 
+# To have a function to processes input data and place them in the required folders. 
 # For instance, if the request is to refine the model with further training using additional input images, 
 # the request_handler moves these images to the specified folder so that ML service can pick them up for training.
 
@@ -84,22 +85,58 @@ def process_request(identifier, data):
 
 
 # Response collects results from the ML service along with the ID. 
-# Based on the ID, it either publishes to Kafka or Pub / Sub.
+# Based on the ID, this function either publishes to Kafka or Pub / Sub.
 def response_handler(identifier, result):
     
     logging.info("unifiedAPI.response_handler - BEGIN")
-    
-    sys.path.insert(1, '../Client')
-    from kafkaRes_send import send_response
+    # print("unifiedAPI.response_handler PID {}".format(os.getpid()))
+    # logging.info("unifiedAPI.response_handler {}".format(os.getpid()))
     
     if (identifier["msg_broker"] == "kafka"):
+        from kafkaRes_send import send_response
+        
         logging.info("unifiedAPI.response_handler - kafkaRes_send.send_response initiating")        
         send_response(result)
         logging.info("unifiedAPI.response_handler - kafkaRes_send.send_response successful")
     
     elif (identifier["msg_broker"] == "PubSub"):
-        pass
+        from psRes_send import send_response
+        
+        logging.info("unifiedAPI.response_handler - psRes_send.send_response initiating")
+        
+        with open('result_file.json', 'w') as rfile:
+            json.dump(result, rfile)
+        
+        #send_response(result)
+        #exec(open('psRes_send.py').send_response(result))
+        os.system("python psRes_send.py")
+
+        logging.info("unifiedAPI.response_handler - psRes_send.send_response successful")
 
     logging.info("unifiedAPI.response_handler - END")
 
 
+
+# def process_response(identifier, result):
+
+#     logging.info("unifiedAPI.process_response - BEGIN")
+#     print("unifiedAPI.process_response PID {}".format(os.getpid()))
+#     logging.info("unifiedAPI.process_response {}".format(os.getpid()))
+ 	
+#     #request_handler(identifier, data)
+#     with ProcessPoolExecutor() as executor:
+#         executor.submit(response_handler, identifier, result)
+ 	
+#     logging.info("unifiedAPI.process_response - END")
+
+
+
+
+if __name__ == "__main__":
+
+    identifier = {"msg_broker": "PubSub"}
+
+    result = {'7': '‘Sneaker’'}
+
+    from psRes_send import send_response
+    response_handler(identifier, result)
